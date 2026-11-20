@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>System Design Course • Day-Wise Revision Hub</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #1e293b;
+      --surface-light: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --border: #2e3b4e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding-bottom: 3rem;
+    }
+
+    /* Sticky Top Header & Day Scroller */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1rem 0.65rem;
+    }
+
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 820px;
+      margin: 0 auto 0.75rem;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Horizontal Swipeable Day Pills */
+    .day-scroller {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      max-width: 820px;
+      margin: 0 auto;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+    }
+
+    .day-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-pill {
+      flex: 0 0 auto;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .day-pill.active {
+      background: var(--accent);
+      color: #0b1120;
+      border-color: var(--accent);
+    }
+
+    .day-pill.locked {
+      opacity: 0.55;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 820px;
+      margin: 1.25rem auto 0;
+      padding: 0 1rem;
+    }
+
+    /* Lecture Header Banner */
+    .lecture-hero {
+      background: linear-gradient(135deg, #1e293b 0%, #131c31 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .lecture-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .lecture-hero h1 {
+      font-size: 1.45rem;
+      line-height: 1.3;
+      margin-bottom: 0.4rem;
+    }
+
+    .lecture-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* Cards & Accordions */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p, .card li {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+    }
+
+    .card ul {
+      padding-left: 1.2rem;
+      margin-top: 0.4rem;
+    }
+
+    .card li {
+      margin-bottom: 0.45rem;
+    }
+
+    code {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      padding: 0.15rem 0.4rem;
+      border-radius: 5px;
+      font-size: 0.88rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* Accordion List */
+    .principle-item {
+      background: #162033;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      overflow: hidden;
+    }
+
+    .principle-header {
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .principle-num {
+      color: var(--accent);
+      margin-right: 0.5rem;
+      font-weight: 700;
+    }
+
+    .principle-body {
+      padding: 0 1rem 0.9rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: none;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 0.6rem;
+    }
+
+    .principle-item.open .principle-body {
+      display: block;
+    }
+
+    /* Mobile-Friendly Comparison Cards */
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .vs-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .lecture-hero h1 {
+        font-size: 1.75rem;
+      }
+    }
+
+    .vs-box {
+      background: #162033;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .vs-box h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pill-green {
+      font-size: 0.72rem;
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--green);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .pill-amber {
+      font-size: 0.72rem;
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--amber);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    /* Interactive Flashcard */
+    .flashcard {
+      background: linear-gradient(145deg, #1e293b, #162033);
+      border: 1.5px solid var(--accent);
+      border-radius: 14px;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      min-height: 170px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .fc-hint {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
+
+    .fc-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .fc-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.85rem;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      background: var(--surface-light);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn:active {
+      background: var(--accent);
+      color: #0b1120;
+    }
+
+    /* Checklist */
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .check-row:last-child {
+      border-bottom: none;
+    }
+
+    .check-row input {
+      margin-top: 0.25rem;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .check-row.done label {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    /* Empty State for Future Days */
+    .coming-soon {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+    }
+
+    .coming-soon h2 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .coming-soon p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navigation Header -->
+  <div class="top-bar">
+    <div class="brand-row">
+      <div class="brand-title">System Design Notes</div>
+      <div class="brand-sub">Padho with Pratyush</div>
+    </div>
+    <div class="day-scroller" id="day-scroller"></div>
+  </div>
+
+  <!-- Dynamic Content Area -->
+  <div class="container" id="app-content"></div>
+
+  <script>
+    // =========================================================================
+    // 📚 COURSE DATA STORE — DAYS 1 TO 7 INCLUDED!
+    // =========================================================================
+    const courseData = [
+      {
+        day: 1,
+        label: "Day 1: Intro & 9 Principles",
+        title: "Introduction to System Design & 9 HLD Principles",
+        duration: "25 mins • Lecture 01",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. The Golden Rule: Only Trade-Offs",
+            body: "There is no single 'right' answer in System Design. A trade-off means optimizing one metric (like speed) almost always requires compromising on another (like strict consistency or cost)."
+          },
+          {
+            heading: "2. HLD vs. LLD in Interviews",
+            body: "<strong>HLD (High-Level Design):</strong> Architectural map, components, scaling, no coding. Heavily tested.<br><strong>LLD (Low-Level Design):</strong> Classes, interfaces, and actual code. Asked less frequently."
+          },
+          {
+            heading: "3. Client-Server Architecture",
+            body: "The internet runs on a continuous <strong>Request & Response</strong> cycle between a Client (your browser/app) and a Server (host machine)."
+          }
+        ],
+        accordionTitle: "The 9 Principles of HLD (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "Scalability / Load", desc: "How smoothly a system handles growing traffic, users, and data volume." },
+          { num: "02", title: "Performance / Latency", desc: "How fast the system processes a request and returns a response." },
+          { num: "03", title: "Availability", desc: "Percentage of uptime over 365 days (e.g., 99.9% or 99.999% — never 100%)." },
+          { num: "04", title: "Reliability & Fault Tolerance", desc: "Operating accurately and continuing to work even when hardware/software fails." },
+          { num: "05", title: "Consistency", desc: "Ensuring all users see the exact same up-to-date data at the same time." },
+          { num: "06", title: "Durability", desc: "Guaranteeing that once data is saved, it is permanently stored and never lost." },
+          { num: "07", title: "Security", desc: "Protecting user data and infrastructure from unauthorized access or attacks." },
+          { num: "08", title: "Cost", desc: "Balancing servers, storage, and engineering expenses within budget." },
+          { num: "09", title: "Maintainability", desc: "Keeping architecture clean so engineers can debug and update it easily." }
+        ],
+        caseStudy: {
+          title: "Real-World Trade-Off: Bank vs. Instagram",
+          left: {
+            name: "Banking System",
+            badge: "Consistency First",
+            badgeType: "green",
+            points: [
+              "Account balances must be 100% accurate immediately.",
+              "Zero tolerance for lost transactions (High Durability).",
+              "Scheduled maintenance downtime is acceptable."
+            ]
+          },
+          right: {
+            name: "Instagram",
+            badge: "Availability First",
+            badgeType: "amber",
+            points: [
+              "Users must always be able to scroll and post.",
+              "Fast feed loading is critical (Low Latency).",
+              "A few seconds delay in seeing a new like is completely fine."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "What is the single most important rule in System Design?", a: "There are no right answers, only trade-offs. Optimizing one metric compromises another." },
+          { q: "HLD vs. LLD — which is tested more in modern interviews?", a: "HLD (High-Level Design) — architectural decisions without writing code." },
+          { q: "Can a system ever achieve 100% availability?", a: "No. It's measured in 'nines' (99.9%, 99.999%) across 365 days." },
+          { q: "Why does a Bank prioritize Consistency over Availability?", a: "Wrong money balances are unacceptable; brief downtime is safer than inconsistent data." },
+          { q: "Difference between Consistency and Durability?", a: "Consistency = everyone sees latest data. Durability = saved data is never lost." }
+        ],
+        checklist: [
+          "Explain why System Design matters more in the AI era",
+          "Define 'Trade-off' using a real-world example",
+          "Differentiate between HLD and LLD",
+          "Recite all 9 Principles of HLD from memory",
+          "Compare Banking vs. Instagram priorities"
+        ]
+      },
+      {
+        day: 2,
+        label: "Day 2: Working of a System",
+        title: "Working Of A System: What Happens When You Open Instagram?",
+        duration: "17 mins • Lecture 02",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. Client-Server Request & Response Flow",
+            body: "When you tap Instagram on your phone, your phone acts as the <strong>Client</strong> and sends a <strong>Request</strong> over the internet to Instagram's <strong>Server</strong> (a powerful remote computer in a data center), which processes your feed and returns a <strong>Response</strong>."
+          },
+          {
+            heading: "2. IP Address & DNS (The Internet's Phonebook)",
+            body: "<strong>IP Address:</strong> Every device/server has a unique numerical address (e.g., <code>142.250.190.46</code>).<br><strong>DNS & DNS Resolver:</strong> Since humans can't memorize numbers, the <strong>DNS Resolver</strong> looks up <code>instagram.com</code> in the Domain Name System and returns its exact IP address to your phone."
+          },
+          {
+            heading: "3. Data Packets & Latency",
+            body: "Data travels broken into tiny <strong>Packets</strong> across physical fiber-optic cables and routers, reassembling on your phone. <strong>Latency</strong> is the total round-trip delay—physical distance increases latency, which is why companies place local servers closer to users."
+          }
+        ],
+        accordionTitle: "Inside a Server: 3 Core Hardware Components (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "CPU (Central Processing Unit)", desc: "The 'brain' of the server that executes application code, runs logic, and processes incoming user requests." },
+          { num: "02", title: "RAM (Random Access Memory)", desc: "Ultra-fast, temporary workspace for active tasks and immediate data access. Volatile—data is wiped if power is lost." },
+          { num: "03", title: "Disk (SSD / HDD)", desc: "Permanent, non-volatile storage where user profiles, posts, databases, and media are stored long-term (high durability, slower than RAM)." }
+        ],
+        caseStudy: {
+          title: "Server Memory Showdown: RAM vs. Disk",
+          left: {
+            name: "RAM (Working Memory)",
+            badge: "Ultra Fast",
+            badgeType: "green",
+            points: [
+              "Stores active processes & hot data for instant access.",
+              "Volatile: data disappears when power turns off.",
+              "More expensive per GB with smaller capacity."
+            ]
+          },
+          right: {
+            name: "Disk (SSD / HDD)",
+            badge: "Permanent Storage",
+            badgeType: "amber",
+            points: [
+              "Saves posts, videos, and databases permanently.",
+              "Non-volatile: retains data even after server restarts.",
+              "Slower than RAM, but offers massive storage capacity."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "What is an IP Address?", a: "A unique numerical identifier (like a home address) assigned to every device and server on the internet." },
+          { q: "What role does DNS play when you open Instagram?", a: "DNS acts as the internet's phonebook, translating 'instagram.com' into its numerical IP address via a DNS Resolver." },
+          { q: "How does data actually travel across the network?", a: "Data is broken into small Packets that travel through physical cables/routers and reassemble on your device." },
+          { q: "What causes Latency and how do companies reduce it?", a: "Latency is network round-trip delay caused largely by physical distance; companies reduce it by placing servers closer to users." },
+          { q: "What are the 3 core hardware components inside a server?", a: "CPU (the brain), RAM (fast temporary workspace), and Disk (permanent storage)." }
+        ],
+        checklist: [
+          "Trace the full Request-Response flow when opening Instagram",
+          "Explain why computers need IP addresses instead of domain names",
+          "Describe how a DNS Resolver finds a server's IP",
+          "Explain how data packets and physical distance affect Latency",
+          "Compare CPU, RAM, and Disk roles inside a server"
+        ]
+      },
+      {
+        day: 3,
+        label: "Day 3: Measuring a System",
+        title: "Measuring & Estimating A System (Back-of-the-Envelope Math)",
+        duration: "35 mins • Lecture 03",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. Why Estimate? Avoiding Overspending & Under-engineering",
+            body: "Without rough math before designing, you either <strong>under-engineer</strong> (buy too few servers and crash under traffic) or <strong>overspend</strong> (buy massive cloud servers for 10M users when you only have 10K)."
+          },
+          {
+            heading: "2. Latency vs. Throughput vs. Bandwidth (Highway Analogy)",
+            body: "<strong>Latency:</strong> Time taken for one request round-trip (<code>ms</code>) — speed of a single car.<br><strong>Throughput:</strong> Total requests handled per second (<code>RPS / QPS</code>) — cars passing a toll booth per second.<br><strong>Bandwidth:</strong> Maximum data volume per second (<code>Mbps / Gbps</code>) — total lanes on the highway."
+          },
+          {
+            heading: "3. Tail Latency & Percentiles (P50, P95, P99)",
+            body: "Averages hide slow outliers. Engineers track percentiles: <strong>P50</strong> (median user), <strong>P95</strong> (95% faster), and <strong>P99</strong> (slowest 1% — often your heaviest power users with the most data)."
+          },
+          {
+            heading: "4. Hardware Speed Hierarchy & BOE Cheat-Sheet",
+            body: "<strong>Speed Order:</strong> <code>RAM (nanoseconds)</code> >> <code>SSD/Disk (milliseconds)</code> >> <code>Cross-Continent Network (150–250ms)</code>.<br><strong>Interview Rounding:</strong> <code>1 Day ≈ 100,000 sec (10⁵)</code> | <code>1 KB = 10³ B</code> | <code>1 MB = 10⁶ B</code> | <code>1 GB = 10⁹ B</code> | <code>1 TB = 10¹² B</code>."
+          }
+        ],
+        accordionTitle: "Worked Case Study: WhatsApp BOE Estimation (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "Step 1: Scale Assumptions", desc: "Assume 500 Million Daily Active Users (DAU), and on average each user sends 40 messages per day." },
+          { num: "02", title: "Step 2: Total Daily Messages", desc: "500 Million users × 40 messages = 20 Billion messages sent per day." },
+          { num: "03", title: "Step 3: Average & Peak Write QPS", desc: "20 Billion ÷ 100,000 sec/day (10⁵) = 200,000 messages/sec average. Multiply by 3x–5x for New Year / peak spikes = 600K to 1M Peak QPS." },
+          { num: "04", title: "Step 4: Daily Text Storage", desc: "If 1 message + metadata = 100 bytes → 20 Billion × 100 bytes = 2,000 Billion bytes = 2 TB/day (just for plain text, excluding media!)." }
+        ],
+        caseStudy: {
+          title: "Workload Patterns: Read-Heavy vs. Write-Heavy",
+          left: {
+            name: "Read-Heavy (YouTube, X)",
+            badge: "100:1 Ratio",
+            badgeType: "green",
+            points: [
+              "Users read/watch far more than they create content.",
+              "Relies heavily on Caching (RAM) and CDNs.",
+              "Goal: Serve repeated reads without hitting the database."
+            ]
+          },
+          right: {
+            name: "Write-Heavy (WhatsApp, Uber GPS)",
+            badge: "Constant Writes",
+            badgeType: "amber",
+            points: [
+              "Millions of messages or live location pings written every second.",
+              "Requires high-throughput databases & message queues.",
+              "Normal vs Peak traffic spikes (2x–5x) must be factored in."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "Why do engineers track P99 latency instead of Average latency?", a: "Averages hide slow outliers. P99 shows the worst experience for the slowest 1% of requests (often power users)." },
+          { q: "Explain Latency, Throughput, and Bandwidth using the Highway analogy.", a: "Latency = speed of 1 car. Throughput = cars passing toll booth/sec (RPS). Bandwidth = width/lanes of the highway (Mbps)." },
+          { q: "How many seconds in a day do we use for Back-of-the-Envelope math?", a: "Round 86,400 seconds up to 100,000 seconds (10⁵) for fast mental division." },
+          { q: "How do you calculate Peak RPS from Average RPS?", a: "Multiply Average RPS by 2x to 5x to account for evening or event traffic spikes." },
+          { q: "Rank RAM, SSD/Disk, and Cross-Continent Network from fastest to slowest.", a: "1. RAM (nanoseconds) → 2. SSD/Disk (milliseconds) → 3. Cross-Continent Network (~150–250ms)." }
+        ],
+        checklist: [
+          "Explain why BOE estimation prevents overspending & under-engineering",
+          "Distinguish Latency, Throughput (RPS), and Bandwidth",
+          "Explain P50, P95, and P99 percentiles and why averages lie",
+          "Compare Read-Heavy vs. Write-Heavy system architectures",
+          "Perform the WhatsApp QPS and daily storage math without notes"
+        ]
+      },
+      {
+        day: 4,
+        label: "Day 4: Story of an App",
+        title: "The Story of an App Growing Up: Hostel Laptop to Instagram Scale",
+        duration: "45 mins • Lecture 04",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. Foundational Reliability Terms",
+            body: "<strong>Bottleneck:</strong> The slowest component limiting overall throughput (e.g., DB crashing while web server is idle).<br><strong>Single Point of Failure (SPOF):</strong> Any single component whose failure brings down the entire app.<br><strong>Redundancy:</strong> Duplicating critical components so a backup takes over instantly when one fails."
+          },
+          {
+            heading: "2. Learning Mindset: Low vs. High Cognitive Demand",
+            body: "Passively watching videos requires <strong>Low Cognitive Demand</strong> and fades quickly. Writing your own notes and explaining stages out loud requires <strong>High Cognitive Demand</strong>—the only way to retain architecture for interviews."
+          }
+        ],
+        accordionTitle: "The 9 Stages of App Growth (Tap each stage to expand)",
+        accordionItems: [
+          { num: "Stage 0", title: "Single Server (Hostel Computer)", desc: "Web app, backend, database, and media all run on one machine. Works for 10–100 users, but suffers resource contention and is a massive SPOF." },
+          { num: "Stage 1", title: "Separating Responsibilities", desc: "Split Web/App Server and Database Server onto separate machines so each tier gets dedicated CPU, RAM, and storage without fighting for resources." },
+          { num: "Stage 2", title: "Vertical Scaling (Scaling Up)", desc: "Upgrade the existing server with more CPU, RAM, and SSD. Simple, but hits a strict hardware ceiling and still leaves a Single Point of Failure." },
+          { num: "Stage 3", title: "Horizontal Scaling & Load Balancers", desc: "Add multiple smaller servers (Scaling Out) behind a Load Balancer. Traffic distributes evenly, and if one server crashes, healthy servers keep running." },
+          { num: "Stage 4", title: "Caching (In-Memory RAM)", desc: "Place Redis/Memcached between servers and DB. Hot data returns instantly on a Cache Hit; only Cache Misses query the slower disk database." },
+          { num: "Stage 5", title: "Database Replication (Primary-Replica)", desc: "1 Primary DB handles all Writes and replicates data to multiple Read Replicas. Replicas serve heavy Reads and act as failover backups." },
+          { num: "Stage 6", title: "Object Storage (Amazon S3) & CDN", desc: "Move heavy photos/videos out of the DB into Object Storage (S3) + CDN edge servers. The DB stores only lightweight metadata and S3 URLs." },
+          { num: "Stage 7", title: "Message Queues (Async Processing)", desc: "Decouple slow jobs (video encoding, notifications) using Producers, Queues (Kafka/RabbitMQ), and Background Workers so users get instant responses." },
+          { num: "Stage 8", title: "Database Sharding (Horizontal Partitioning)", desc: "Split one massive database into smaller independent Shards using a Shard Key (e.g., User ID ranges) to scale massive write volumes." },
+          { num: "Stage 9", title: "Microservices & Final Architecture", desc: "Break the giant Monolith codebase into independent services (Auth, Feed, Upload, Chat) that teams can deploy and scale independently." }
+        ],
+        caseStudy: {
+          title: "Scaling & Architecture Trade-Offs",
+          left: {
+            name: "Vertical vs. Horizontal Scaling",
+            badge: "Stages 2 & 3",
+            badgeType: "green",
+            points: [
+              "Vertical (Scale Up): Bigger machine; hits hardware limit & remains a SPOF.",
+              "Horizontal (Scale Out): Many machines + Load Balancer; infinite scale & high redundancy."
+            ]
+          },
+          right: {
+            name: "Sync vs. Async (Message Queues)",
+            badge: "Stage 7",
+            badgeType: "amber",
+            points: [
+              "Synchronous: User waits while video encodes → slow & causes timeouts.",
+              "Asynchronous: Server drops task in Queue, responds immediately, Workers process later."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "What is a Single Point of Failure (SPOF) and how do you fix it?", a: "A single component whose crash takes down the whole system. Fixed by adding Redundancy (multiple servers, replicas)." },
+          { q: "What happens in Stage 1 when an app starts outgrowing a single server?", a: "Separating Responsibilities: splitting the Web/Application Server and Database Server onto separate machines." },
+          { q: "How does Database Replication (Primary-Replica) split traffic?", a: "All Writes go to the Primary (Master) DB, while Reads are distributed across Read Replicas." },
+          { q: "Why move images and videos to Object Storage (S3) instead of keeping them in the Database?", a: "Heavy media bloats the DB and slows backups. S3 + CDN stores media cheaply and serves it globally, while DB stores only URLs." },
+          { q: "When do you need Database Sharding (Stage 8) vs. Read Replicas (Stage 5)?", a: "Read Replicas scale heavy Reads; Sharding splits data across multiple DBs to scale massive Writes and huge storage." }
+        ],
+        checklist: [
+          "Define Bottleneck, Single Point of Failure (SPOF), and Redundancy",
+          "Walk through all 9 stages from Hostel Laptop to Microservices in order",
+          "Explain why Vertical Scaling hits a wall compared to Horizontal Scaling",
+          "Describe Cache Hit vs. Cache Miss and Primary-Replica DB flows",
+          "Explain when to introduce S3/CDN, Message Queues, and DB Sharding"
+        ]
+      },
+      {
+        day: 5,
+        label: "Day 5: Scaling & Load Balancers",
+        title: "Horizontal vs. Vertical Scaling, Stateless Servers & Load Balancers",
+        duration: "35 mins • Lecture 05",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. How Horizontal Scaling & Load Balancers Work",
+            body: "With multiple servers (each having its own private IP), clients cannot guess which server to hit. A <strong>Load Balancer (LB)</strong> sits in front with a single public IP, acting as a reverse proxy that distributes requests evenly across healthy backend servers."
+          },
+          {
+            heading: "2. Stateful vs. Stateless Servers (Cookies & Sessions)",
+            body: "<strong>Stateful Trap:</strong> If Server 1 stores User A's login session in its local RAM, and the LB sends User A's next request to Server 2, User A gets logged out! (<em>Sticky Sessions</em> pin users to one server, but break on server crashes).<br><strong>Stateless Solution:</strong> Store zero session state in server RAM. Use <strong>Client Cookies / JWT tokens</strong> or a shared external store like <strong>Redis</strong> so any server can serve any user."
+          },
+          {
+            heading: "3. Load Balancer Core Functionalities",
+            body: "<strong>1. Traffic Spreading:</strong> Prevents overloading any single server.<br><strong>2. Health Checks (Heartbeats):</strong> Periodically pings servers; if one fails to respond, it is automatically removed from the pool.<br><strong>3. Security & SSL Termination:</strong> Hides internal server IPs, mitigates DDoS attacks, and handles HTTPS decryption."
+          }
+        ],
+        accordionTitle: "4 Load Balancing Algorithms (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "Round Robin", desc: "Routes requests sequentially in a loop (Server 1 → Server 2 → Server 3 → Server 1). Simple and ideal when all servers have identical hardware specs." },
+          { num: "02", title: "Weighted Round Robin", desc: "Assigns higher traffic weights to stronger servers (e.g., a 32GB RAM server gets 3x more requests than an 8GB RAM server)." },
+          { num: "03", title: "Least Connections (Load-Based)", desc: "Sends new requests to the server with the fewest active connections—best when requests vary heavily in processing time." },
+          { num: "04", title: "IP Hash / Consistent Hashing", desc: "Hashes the client's IP or User ID to consistently route that user to the same server (improves cache hit rates while staying scalable)." }
+        ],
+        caseStudy: {
+          title: "Scaling Showdown: Vertical vs. Horizontal",
+          left: {
+            name: "Vertical Scaling (Scale Up)",
+            badge: "Bigger Machine",
+            badgeType: "amber",
+            points: [
+              "Add more CPU, RAM, and SSD to one existing server.",
+              "Simple setup; zero code or architecture changes needed.",
+              "Hits strict hardware/cost limits & remains a SPOF."
+            ]
+          },
+          right: {
+            name: "Horizontal Scaling (Scale Out)",
+            badge: "More Machines",
+            badgeType: "green",
+            points: [
+              "Add multiple commodity servers behind a Load Balancer.",
+              "Virtually infinite scaling & built-in fault tolerance.",
+              "Requires Stateless servers (Cookies/JWT or Redis sessions)."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "Why do Stateful servers fail in a horizontally scaled system?", a: "If Server 1 stores a user's login session in local RAM and the Load Balancer routes the next request to Server 2, Server 2 won't recognize the user." },
+          { q: "How do you make backend servers Stateless?", a: "Store zero session data in server RAM. Use client-side Cookies/JWT tokens or a shared external store like Redis." },
+          { q: "What is a Load Balancer Heartbeat / Health Check?", a: "The LB periodically pings backend servers ('Are you alive?'). Unresponsive servers are automatically removed so users never hit dead nodes." },
+          { q: "When should you use Weighted Round Robin over standard Round Robin?", a: "When your backend servers have different hardware capacities (e.g., 32GB RAM vs 8GB RAM) so stronger servers take more load." },
+          { q: "What is the main flaw of Sticky Sessions?", a: "It causes uneven traffic distribution and if that pinned server crashes, the user's session is completely lost." }
+        ],
+        checklist: [
+          "Compare Vertical vs. Horizontal Scaling pros, cons, and use cases",
+          "Explain how a Load Balancer solves the multi-server routing problem",
+          "Explain Stateful vs. Stateless servers using the login session example",
+          "List the 3 core functions of a Load Balancer (Traffic, Heartbeats, Security)",
+          "Compare Round Robin, Weighted, Least Connections, and Hash-based algorithms"
+        ]
+      },
+      {
+        day: 6,
+        label: "Day 6: SQL vs NoSQL",
+        title: "SQL vs NoSQL Databases: What, When, Why",
+        duration: "35 mins • Lecture 06",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. SQL (Relational) Databases & ACID Properties",
+            body: "Databases like <strong>PostgreSQL</strong> and <strong>MySQL</strong> organize data into structured tables (rows & columns) with predefined schemas (<strong>Schema-on-Write</strong>) and link tables via <strong>JOINs</strong>.<br><strong>ACID Guarantees:</strong> <code>Atomicity</code> (all or nothing), <code>Consistency</code> (valid state rules), <code>Isolation</code> (concurrent transactions don't clash), and <code>Durability</code> (saved permanently on disk)."
+          },
+          {
+            heading: "2. Why NoSQL & The BASE Consistency Model",
+            body: "NoSQL ('Not Only SQL') databases sacrifice complex JOINs and rigid schemas to achieve effortless <strong>Horizontal Scaling</strong> and high speed for massive, rapidly changing data.<br><strong>BASE Model:</strong> <code>Basically Available</code> (always responds), <code>Soft State</code> (state may change over time), <code>Eventual Consistency</code> (all nodes sync up shortly rather than instantaneously)."
+          },
+          {
+            heading: "3. Real-World Hybrid Strategy (Polyglot Persistence)",
+            body: "Modern apps like <strong>Zomato</strong> or Amazon don't pick just one—they combine both: <strong>SQL</strong> for payments & order transactions (strict ACID), and <strong>NoSQL</strong> for restaurant menus, live sessions, and high-speed caching."
+          }
+        ],
+        accordionTitle: "The 4 Types of NoSQL Databases (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "Key-Value Stores (e.g., Redis, DynamoDB)", desc: "Simplest and fastest model storing Key → Value pairs in RAM/SSD. Ideal for caching, user sessions, leaderboards, and rate limiting." },
+          { num: "02", title: "Document Databases (e.g., MongoDB)", desc: "Stores flexible JSON-like documents with dynamic schemas (Schema-on-Read). Great for product catalogs, menus, and user profiles." },
+          { num: "03", title: "Wide-Column Stores (e.g., Apache Cassandra)", desc: "Stores data in dynamic columns optimized for massive write throughput across distributed nodes. Ideal for chat history, logs, and IoT feeds." },
+          { num: "04", title: "Graph Databases (e.g., Neo4j)", desc: "Stores entities as Nodes and relationships as Edges. Excels at multi-hop queries like social networks ('friends of friends') and fraud detection." }
+        ],
+        caseStudy: {
+          title: "Database Decision Matrix: SQL vs. NoSQL",
+          left: {
+            name: "Choose SQL (PostgreSQL / MySQL)",
+            badge: "ACID & Relations",
+            badgeType: "green",
+            points: [
+              "Structured data with clear relationships needing complex JOINs.",
+              "Strict ACID transactions (Banking, Payments, Ticket Booking).",
+              "Data schema is well-defined and rarely changes."
+            ]
+          },
+          right: {
+            name: "Choose NoSQL (Mongo, Cassandra, Redis)",
+            badge: "Scale & Flexibility",
+            badgeType: "amber",
+            points: [
+              "Massive scale requiring effortless Horizontal Scaling / Sharding.",
+              "Dynamic, unstructured, or rapidly evolving schemas (Catalogs).",
+              "Ultra-high write loads (Chat/Logs) or sub-ms reads (Caching)."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "What do the 4 letters in ACID stand for?", a: "Atomicity (all or nothing), Consistency (valid rules), Isolation (no concurrent interference), Durability (permanently saved)." },
+          { q: "What does BASE stand for in NoSQL databases?", a: "Basically Available, Soft State, and Eventual Consistency (prioritizes availability and scale over instant consistency)." },
+          { q: "Name the 4 types of NoSQL databases with one example each.", a: "1. Key-Value (Redis), 2. Document (MongoDB), 3. Wide-Column (Cassandra), 4. Graph (Neo4j)." },
+          { q: "Why is horizontally scaling a traditional SQL database difficult?", a: "SQL relies on relational tables and cross-table JOINs with strict ACID locks; splitting tables across servers breaks JOIN performance." },
+          { q: "How does an app like Zomato use both SQL and NoSQL together?", a: "SQL handles payments and order transactions (ACID), while NoSQL handles dynamic menus, user sessions, and caching." }
+        ],
+        checklist: [
+          "Explain Schema-on-Write, Primary/Foreign Keys, and JOINs in SQL",
+          "Define all 4 ACID properties (Atomicity, Consistency, Isolation, Durability)",
+          "Explain why NoSQL was created and define the BASE model",
+          "Compare all 4 NoSQL database types (Key-Value, Document, Wide-Column, Graph)",
+          "Decide between SQL, NoSQL, or a Hybrid approach for real-world apps"
+        ]
+      },
+      {
+        day: 7,
+        label: "Day 7: Database Indexing",
+        title: "Database Indexing: B+ Trees, LSM Trees & Query Optimization",
+        duration: "36 mins • Lecture 07",
+        status: "completed",
+        coreTakeaways: [
+          {
+            heading: "1. Full Table Scan vs. Index & Disk Pages",
+            body: "Without an index, finding a user runs a slow <strong>Full Table Scan O(N)</strong> across disk blocks. Databases read/write fixed chunks called <strong>Disk Pages (4KB–16KB)</strong>. An <strong>Index</strong> acts like a textbook's back index—storing a sorted lookup key + disk pointer so queries jump straight to the target page in milliseconds."
+          },
+          {
+            heading: "2. Types of Indexes & Leftmost Prefix Rule",
+            body: "<strong>Clustered Index:</strong> Physically sorts actual table rows on disk (usually Primary Key; only <strong>1 per table</strong>).<br><strong>Non-Clustered (Secondary) Index:</strong> Separate sorted structure pointing back to the Primary Key (can have <strong>many</strong>, e.g., on <code>email</code>).<br><strong>Composite Index (A, B, C):</strong> Follows the <strong>Leftmost Prefix Rule</strong>—works for <code>(A)</code>, <code>(A,B)</code>, or <code>(A,B,C)</code>, but fails if <code>A</code> is skipped."
+          },
+          {
+            heading: "3. Trade-Offs: Read Speed vs. Write Overhead",
+            body: "Every index speeds up <code>SELECT</code> queries, but slows down <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code> (every attached index must also be updated) and consumes extra SSD & RAM. Index <strong>High Cardinality</strong> columns (<code>email</code>, <code>user_id</code>), and avoid indexing Low Cardinality booleans (<code>is_active</code>)."
+          }
+        ],
+        accordionTitle: "3 Indexing Data Structures (Tap to expand)",
+        accordionItems: [
+          { num: "01", title: "Hash Index — O(1) Exact Lookups", desc: "In-memory hash map pointing keys directly to disk offsets. Blazingly fast for exact equality (WHERE id = 105), but cannot handle range queries (BETWEEN) or sorting (ORDER BY)." },
+          { num: "02", title: "B+ Tree — Standard for SQL (PostgreSQL, MySQL)", desc: "Self-balancing multi-way tree only 3–4 levels deep for billions of rows. Internal nodes hold routing keys; all data pointers live in Leaf Nodes connected via a Doubly Linked List for super-fast range scans." },
+          { num: "03", title: "LSM Tree — Built for Write-Heavy NoSQL (Cassandra, RocksDB)", desc: "Writes go sequentially to an in-memory MemTable (+ WAL) and flush to immutable sorted SSTables on disk, merged later via background Compaction. Maximizes sequential write throughput." }
+        ],
+        caseStudy: {
+          title: "Index Engine Showdown: B+ Tree vs. LSM Tree",
+          left: {
+            name: "B+ Tree (MySQL, Postgres)",
+            badge: "Read-Optimized",
+            badgeType: "green",
+            points: [
+              "Predictable O(log N) reads (3–4 disk hops) & fast range scans.",
+              "Updates modify pages in-place on disk (random I/O).",
+              "Best for read-heavy & transactional relational workloads."
+            ]
+          },
+          right: {
+            name: "LSM Tree (Cassandra, RocksDB)",
+            badge: "Write-Optimized",
+            badgeType: "amber",
+            points: [
+              "Append-only sequential writes via MemTable → SSTables.",
+              "Background Compaction merges files & removes stale data.",
+              "Best for massive write streams (chat, logs, IoT telemetry)."
+            ]
+          }
+        },
+        flashcards: [
+          { q: "Why is a B+ Tree better than a standard B-Tree for database range queries?", a: "In a B+ Tree, all data pointers live in the Leaf Nodes, which are linked together as a Doubly Linked List for fast sequential range scans." },
+          { q: "How does an LSM Tree achieve ultra-fast writes?", a: "It writes sequentially to an in-memory MemTable (+ Write-Ahead Log) and flushes sorted immutable SSTables to disk instead of doing random disk seeks." },
+          { q: "Why can a database table have only ONE Clustered Index?", a: "Because a Clustered Index defines the actual physical sort order of the rows stored on disk—data can only be physically ordered in one way." },
+          { q: "Explain the Leftmost Prefix Rule for a Composite Index on (city, age, gender).", a: "The index works if queries filter by (city), (city, age), or (city, age, gender), but cannot be used if 'city' is omitted." },
+          { q: "What happens if you add 15 indexes to a write-heavy table?", a: "Every INSERT, UPDATE, or DELETE becomes much slower because the database must update and rebalance all 15 index trees on every write." }
+        ],
+        checklist: [
+          "Explain Full Table Scan O(N), Disk Pages, and how an Index reduces Disk I/O",
+          "Compare Hash Index, B+ Tree, and LSM Tree (MemTable, SSTable, Compaction)",
+          "Differentiate Clustered vs. Non-Clustered (Secondary) Indexes",
+          "Apply the Leftmost Prefix Rule on Composite Indexes",
+          "Explain High vs. Low Cardinality and the Read vs. Write indexing trade-off"
+        ]
+      },
+      {
+        day: 8,
+        label: "Day 8: Next Lecture",
+        title: "Upcoming System Design Topic",
+        duration: "Lecture 08",
+        status: "upcoming"
+      }
+    ];
+
+    // =========================================================================
+    // ⚙️ APP RENDERING & INTERACTIVITY LOGIC
+    // =========================================================================
+    let activeDayIndex = 6; // Opens directly on Day 7!
+    let fcIndex = 0;
+    let fcFlipped = false;
+
+    function init() {
+      renderDayScroller();
+      renderDayContent(activeDayIndex);
+    }
+
+    function renderDayScroller() {
+      const scroller = document.getElementById("day-scroller");
+      scroller.innerHTML = courseData.map((item, idx) => `
+        <button 
+          class="day-pill ${idx === activeDayIndex ? 'active' : ''} ${item.status === 'upcoming' ? 'locked' : ''}" 
+          onclick="selectDay(${idx})">
+          Day ${item.day}
+        </button>
+      `).join("");
+    }
+
+    function selectDay(idx) {
+      activeDayIndex = idx;
+      fcIndex = 0;
+      fcFlipped = false;
+      renderDayScroller();
+      renderDayContent(idx);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderDayContent(idx) {
+      const data = courseData[idx];
+      const container = document.getElementById("app-content");
+
+      if (data.status === "upcoming") {
+        container.innerHTML = `
+          <div class="lecture-hero">
+            <div class="lecture-tag">Day ${data.day} • ${data.duration}</div>
+            <h1>${data.title}</h1>
+          </div>
+          <div class="coming-soon">
+            <h2>Ready for Day ${data.day} Notes</h2>
+            <p>Watch Lecture ${data.day} and ask me to summarize it—we will plug your notes straight into this slot!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Build Core Takeaways
+      const takeawaysHTML = data.coreTakeaways.map(t => `
+        <div class="card">
+          <h2>${t.heading}</h2>
+          <p>${t.body}</p>
+        </div>
+      `).join("");
+
+      // Build Accordion Section
+      const accordionHTML = data.accordionItems ? `
+        <div class="card">
+          <h2>${data.accordionTitle}</h2>
+          <div style="margin-top: 0.75rem;">
+            ${data.accordionItems.map((p, i) => `
+              <div class="principle-item ${i === 0 ? 'open' : ''}" onclick="this.classList.toggle('open')">
+                <div class="principle-header">
+                  <span><span class="principle-num">${p.num}</span> ${p.title}</span>
+                  <span style="color: var(--muted); font-size: 0.8rem;">▼</span>
+                </div>
+                <div class="principle-body">${p.desc}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      // Build Case Study / Comparison
+      const caseStudyHTML = data.caseStudy ? `
+        <div class="card">
+          <h2>${data.caseStudy.title}</h2>
+          <div class="vs-grid">
+            <div class="vs-box">
+              <h3>${data.caseStudy.left.name} <span class="pill-${data.caseStudy.left.badgeType}">${data.caseStudy.left.badge}</span></h3>
+              <ul>${data.caseStudy.left.points.map(pt => `<li>${pt}</li>`).join("")}</ul>
+            </div>
+            <div class="vs-box">
+              <h3>${data.caseStudy.right.name} <span class="pill-${data.caseStudy.right.badgeType}">${data.caseStudy.right.badge}</span></h3>
+              <ul>${data.caseStudy.right.points.map(pt => `<li>${pt}</li>`).join("")}</ul>
+            </div>
+          </div>
+        </div>
+      ` : "";
+
+      // Build Flashcards
+      const flashcardsHTML = data.flashcards ? `
+        <div class="card">
+          <h2>Quick Recall Flashcards</h2>
+          <div class="flashcard" onclick="flipCard()">
+            <div class="fc-hint" id="fc-hint">Question (Tap card to flip)</div>
+            <div class="fc-text" id="fc-text">${data.flashcards[0].q}</div>
+          </div>
+          <div class="fc-nav">
+            <button class="btn" onclick="prevCard()">← Prev</button>
+            <span id="fc-count" style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">1 / ${data.flashcards.length}</span>
+            <button class="btn" onclick="nextCard()">Next →</button>
+          </div>
+        </div>
+      ` : "";
+
+      // Build Checklist
+      const checklistHTML = data.checklist ? `
+        <div class="card">
+          <h2>Day ${data.day} Revision Checklist</h2>
+          <div style="margin-top: 0.5rem;">
+            ${data.checklist.map((item, i) => {
+              const key = `sd_day${data.day}_chk_${i}`;
+              const checked = localStorage.getItem(key) === "true";
+              return `
+                <div class="check-row ${checked ? 'done' : ''}">
+                  <input type="checkbox" id="${key}" ${checked ? 'checked' : ''} onchange="toggleCheck('${key}', this)">
+                  <label for="${key}">${item}</label>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      container.innerHTML = `
+        <div class="lecture-hero">
+          <div class="lecture-tag">Day ${data.day} • ${data.duration}</div>
+          <h1>${data.title}</h1>
+          <div class="lecture-meta">Tap any item below to expand • Progress saves automatically</div>
+        </div>
+        ${takeawaysHTML}
+        ${accordionHTML}
+        ${caseStudyHTML}
+        ${flashcardsHTML}
+        ${checklistHTML}
+      `;
+    }
+
+    function flipCard() {
+      const cards = courseData[activeDayIndex].flashcards;
+      fcFlipped = !fcFlipped;
+      document.getElementById("fc-hint").innerText = fcFlipped ? "Answer (Tap to flip back)" : "Question (Tap card to flip)";
+      document.getElementById("fc-text").innerText = fcFlipped ? cards[fcIndex].a : cards[fcIndex].q;
+    }
+
+    function nextCard() {
+      const cards = courseData[activeDayIndex].flashcards;
+      fcIndex = (fcIndex + 1) % cards.length;
+      fcFlipped = false;
+      updateCardUI();
+    }
+
+    function prevCard() {
+      const cards = courseData[activeDayIndex].flashcards;
+      fcIndex = (fcIndex - 1 + cards.length) % cards.length;
+      fcFlipped = false;
+      updateCardUI();
+    }
+
+    function updateCardUI() {
+      const cards = courseData[activeDayIndex].flashcards;
+      document.getElementById("fc-hint").innerText = "Question (Tap card to flip)";
+      document.getElementById("fc-text").innerText = cards[fcIndex].q;
+      document.getElementById("fc-count").innerText = `${fcIndex + 1} / ${cards.length}`;
+    }
+
+    function toggleCheck(key, el) {
+      localStorage.setItem(key, el.checked);
+      el.parentElement.classList.toggle("done", el.checked);
+    }
+
+    init();
+  </script>
+</body>
+</html>
